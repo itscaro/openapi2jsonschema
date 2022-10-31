@@ -175,6 +175,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
                     "customresourcedefinitionspec",
                     "jsonschemapropsorstringarray",
                     "jsonschemapropsorbool",
+                    "customresourcedefinitionversion",  # maximum recursion depth exceeded while calling a Python object
                 ]
             ):
                 raise UnsupportedError("%s not currently supported" % kind)
