@@ -9,7 +9,7 @@ setup(name='Openapi2jsonschema',
       packages=['openapi2jsonschema'],
       entry_points={
         'console_scripts': [
-            'openapi2jsonschema = Openapi2jsonschema.command:default',
+            'openapi2jsonschema = openapi2jsonschema.command:default',
         ]
       },
       install_requires=[
