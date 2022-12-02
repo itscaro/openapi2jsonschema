@@ -108,7 +108,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
                                     "enum",
                                     api_version,
                                 )
-                            if "kind" in type_def["properties"]:
+                            if "kind" in type_def.get("properties", {}):
                                 kind = kube_ext["kind"]
                                 append_no_duplicates(
                                     type_def["properties"]["kind"], "enum", kind
