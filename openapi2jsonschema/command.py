@@ -96,7 +96,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
                     type_def = definitions[type_name]
                     if "x-kubernetes-group-version-kind" in type_def:
                         for kube_ext in type_def["x-kubernetes-group-version-kind"]:
-                            if expanded and "apiVersion" in type_def["properties"]:
+                            if expanded and "apiVersion" in type_def.get("properties", {}):
                                 api_version = (
                                     kube_ext["group"] + "/" +
                                     kube_ext["version"]
