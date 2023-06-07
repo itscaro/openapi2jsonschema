@@ -127,10 +127,14 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
         components = data["components"]["schemas"]
 
     for title in components:
-        kind = title.split(".")[-1].lower()
+        title_split = title.split(".")
+        if len(title_split) < 3:
+            error(f"{title} does not appear to contain normal group name, skipping.")
+            continue
+        kind = title_split[-1].lower()
         if kubernetes:
-            group = title.split(".")[-3].lower()
-            api_version = title.split(".")[-2].lower()
+            group = title_split[-3].lower()
+            api_version = title_split[-2].lower()
         specification = components[title]
         specification["$schema"] = "http://json-schema.org/schema#"
         specification.setdefault("type", "object")
@@ -153,7 +157,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
 
             # These APIs are all deprecated
             if kubernetes:
-                if title.split(".")[3] == "pkg" and title.split(".")[2] == "kubernetes":
+                if title_split[3] == "pkg" and title_split[2] == "kubernetes":
                     raise UnsupportedError(
                         "%s not currently supported, due to use of pkg namespace"
                         % title
@@ -208,7 +212,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
                 debug("Generating %s.json" % full_name)
                 schema_file.write(json.dumps(specification, indent=2))
         except Exception as e:
-            error("An error occured processing %s: %s" % (kind, e))
+            error("An error occurred processing %s: %s" % (kind, e))
 
     with open("%s/all.json" % output, "w") as all_file:
         info("Generating schema for all types")
