@@ -1,4 +1,5 @@
 import os
+
 import pytest  # type: ignore
 from click.testing import CliRunner
 

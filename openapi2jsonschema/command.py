@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 
 import json
-import yaml
-import urllib
 import os
 import sys
+import urllib
 
-from jsonref import JsonRef  # type: ignore
 import click
+import yaml
+from jsonref import JsonRef  # type: ignore
 
-from openapi2jsonschema.log import info, debug, error
+from openapi2jsonschema.errors import UnsupportedError
+from openapi2jsonschema.log import debug, error, info
 from openapi2jsonschema.util import (
     additional_properties,
-    replace_int_or_string,
     allow_null_optional_fields,
-    change_dict_values,
     append_no_duplicates,
+    change_dict_values,
+    replace_int_or_string,
 )
-from openapi2jsonschema.errors import UnsupportedError
 
 
 @click.command()
@@ -34,15 +34,9 @@ from openapi2jsonschema.errors import UnsupportedError
     default="_definitions.json",
     help="Prefix for JSON references (only for OpenAPI versions before 3.0)",
 )
-@click.option(
-    "--stand-alone", is_flag=True, help="Whether or not to de-reference JSON schemas"
-)
-@click.option(
-    "--expanded", is_flag=True, help="Expand Kubernetes schemas by API version"
-)
-@click.option(
-    "--kubernetes", is_flag=True, help="Enable Kubernetes specific processors"
-)
+@click.option("--stand-alone", is_flag=True, help="Whether or not to de-reference JSON schemas")
+@click.option("--expanded", is_flag=True, help="Expand Kubernetes schemas by API version")
+@click.option("--kubernetes", is_flag=True, help="Enable Kubernetes specific processors")
 @click.option(
     "--strict",
     is_flag=True,
@@ -98,8 +92,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
                         for kube_ext in type_def["x-kubernetes-group-version-kind"]:
                             if expanded and "apiVersion" in type_def.get("properties", {}):
                                 api_version = (
-                                    kube_ext["group"] + "/" +
-                                    kube_ext["version"]
+                                    kube_ext["group"] + "/" + kube_ext["version"]
                                     if kube_ext["group"]
                                     else kube_ext["version"]
                                 )
@@ -110,13 +103,10 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
                                 )
                             if "kind" in type_def.get("properties", {}):
                                 kind = kube_ext["kind"]
-                                append_no_duplicates(
-                                    type_def["properties"]["kind"], "enum", kind
-                                )
+                                append_no_duplicates(type_def["properties"]["kind"], "enum", kind)
             if strict:
                 definitions = additional_properties(definitions)
-            definitions_file.write(json.dumps(
-                {"definitions": definitions}, indent=2))
+            definitions_file.write(json.dumps({"definitions": definitions}, indent=2))
 
     types = []
 
@@ -154,10 +144,7 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
             # These APIs are all deprecated
             if kubernetes:
                 if title.split(".")[3] == "pkg" and title.split(".")[2] == "kubernetes":
-                    raise UnsupportedError(
-                        "%s not currently supported, due to use of pkg namespace"
-                        % title
-                    )
+                    raise UnsupportedError("%s not currently supported, due to use of pkg namespace" % title)
 
             # This list of Kubernetes types carry around jsonschema for Kubernetes and don't
             # currently work with openapi2jsonschema
@@ -185,14 +172,11 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
 
             if stand_alone:
                 base = "file://%s/%s/" % (os.getcwd(), output)
-                specification = JsonRef.replace_refs(
-                    specification, base_uri=base)
+                specification = JsonRef.replace_refs(specification, base_uri=base)
 
             if "additionalProperties" in specification:
                 if specification["additionalProperties"]:
-                    updated = change_dict_values(
-                        specification["additionalProperties"], prefix, version
-                    )
+                    updated = change_dict_values(specification["additionalProperties"], prefix, version)
                     specification["additionalProperties"] = updated
 
             if strict and "properties" in specification:
@@ -215,13 +199,9 @@ def default(output, schema, prefix, stand_alone, expanded, kubernetes, strict):
         contents = {"oneOf": []}
         for title in types:
             if version < "3":
-                contents["oneOf"].append(
-                    {"$ref": "%s#/definitions/%s" % (prefix, title)}
-                )
+                contents["oneOf"].append({"$ref": "%s#/definitions/%s" % (prefix, title)})
             else:
-                contents["oneOf"].append(
-                    {"$ref": (title.replace("#/components/schemas/", "") + ".json")}
-                )
+                contents["oneOf"].append({"$ref": (title.replace("#/components/schemas/", "") + ".json")})
         all_file.write(json.dumps(contents, indent=2))
 
 
