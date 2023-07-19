@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "openapi2jsonschema"
+version = "2.0.0"
+description = "OpenAPI to JSON Schemas converter"
+authors = ["Yann Hamon <yann@mandragor.org>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+openapi2jsonschema = "openapi2jsonschema.command:default"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+click = "*"
+jsonref = "*"
+kubernetes = "<25"
+pyyaml = "*"
+
+
+[tool.poetry.group.dev.dependencies]
+bandit = {extras = ["toml"], version = "*"}
+black = "*"
+flake8-bugbear = "*"
+flake8-pyproject = "*"
+ipython = "*"
+isort = "*"
+mypy = "*"
+pylint = "*"
+types-python-dateutil = "*"
+
+[tool.bandit]
+
+[tool.black]
+line-length = 120
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.isort]
+line_length = 120
+profile = "black"
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-module-docstring",
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
