@@ -5,6 +5,9 @@ description = "OpenAPI to JSON Schemas converter"
 authors = ["Yann Hamon <yann@mandragor.org>"]
 readme = "README.md"
 
+[tool.poetry.scripts]
+openapi2jsonschema = "openapi2jsonschema.command:default"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 click = "*"
